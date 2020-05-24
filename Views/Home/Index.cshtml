@@ -1,0 +1,165 @@
+﻿@model Simplex
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+    <div class="text-center">
+        <br>
+        <h1 class="display-4"><strong>Simplex</strong></h1>
+        <br>
+        <br>
+    </div>
+
+<fieldset>
+    <form asp-controller="Home" asp-action="Index">
+        <div class="row">
+            <div class="col-sm-6">
+                <input class="form-control" placeholder="Quantidade de Variáveis" asp-for="Variaveis" />
+            </div>
+            <div class="col-sm-6">
+                <input class="form-control" placeholder="Quantidade de Restrições" asp-for="Restricoes" />
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col-sm-6">
+                <label class="col-form-label">Escolha a operação</label>
+                <select asp-for="Minimizar" class="custom-select">
+                    <option value="false">Maximizar</option>
+                    <option value="true">Minimizar</option>
+                </select>
+            </div>
+            <div class="col-sm-6">
+                <label class="col-form-label">Exibir passo a passo</label>
+                <select asp-for="ExibirPassoAPasso" class="custom-select">
+                    <option value="true">Sim</option>
+                    <option value="false">Não</option>
+                </select>
+            </div>
+        </div>
+        <br>
+        <button class="btn btn-sm btn-secondary" type="submit">Gravar</button>
+    </form>
+</fieldset>
+<hr>
+<fieldset>
+    <legend>FORMULÁRIO</legend>
+    <div id="form">
+        @{
+            if (Model.Restricoes == null)
+                Model.Restricoes = 0;
+            if (Model.Variaveis == null)
+                Model.Variaveis = 0;
+
+            Model.Matriz = new decimal[Model.Restricoes.Value * ((Model.Variaveis.Value * 2) + 1)];
+
+                <form asp-controller="Simplex" asp-action="Index">
+                    @if (Model.Variaveis > 0)
+                    {
+                        <fieldset>
+                            <legend>Função Objetivo</legend>
+                            <div class='row'>
+                                @for (int j = 0; j < @Model.Variaveis; j++)
+                                {
+                                    if (j == @Model.Variaveis - 1)
+                                    {
+                                        <div class='col-sm-2'>
+                                            <input asp-for="objectiveVector[j]" class='form-control'>
+                                        </div>
+                                    }
+                                    else
+                                    {
+
+                                        <div class='col-sm-2'>
+                                            <input asp-for="objectiveVector[j]" class='form-control'>
+                                        </div>
+                                        <p> + </p>
+                                    }
+                                }
+                            </div>
+                        </fieldset>
+                        <br>
+                        <hr>
+                        <br>
+                    }
+
+                    @for (int i = 0, k = 0; i < @Model.Restricoes; i++)
+                    {
+
+                        <fieldset>
+                            <legend>Restrição @(i + 1)</legend><div class='row'>
+                                @for (int j = 0; j <= @Model.Variaveis; j++)
+                                {
+
+                                    if (j == @Model.Variaveis - 1)
+                                    {
+                                        <div class='col-sm-2'>
+                                            <input asp-for="Matriz[k]" class='form-control'>
+                                        </div>
+                                        <p> = </p>
+                                    }
+                                    else if (j == @Model.Variaveis)
+                                    {
+                                        <div class='col-sm-2'>
+                                            <input asp-for="Matriz[k]" class='form-control'>
+                                        </div>
+                                    }
+                                    else
+                                    {
+
+                                        <div class='col-sm-2'>
+                                            <input asp-for="Matriz[k]" class='form-control'>
+                                        </div>
+                                        <p> + </p>
+                                    }
+                                    k++;
+                                }
+                            </div>
+                        </fieldset>
+                        <hr>
+
+                    }
+                    <br><br>
+                    <button class="btn btn-sm btn-secondary" type="submit">Executar Simplex</button>
+                </form>
+        }
+
+    </div>
+    <br>
+</fieldset>
+<hr>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+<script type="text/javascript">
+    //function gerarForm(argument) {
+    //    let total_var = $('#qtde_var').val();
+    //    let total_restricao = $('#qtde_restricoes').val();
+    //    var $form = "<form action='/Simplex/Index' method='post'>";
+    //    $form += "<hr>";
+    //    for (var i = 0; i < total_restricao; i++)
+    //    {
+    //        $form += "<fieldset><legend>Restrição " + (i+1) + "</legend><div class='row'>"
+    //        for (var j = 0; j <= total_var; j++)
+    //        {
+    //            if(j == total_var-1)
+    //            {
+    //                $form += "<div class='col-sm-2'><input id='var" + j + "_restricao" + i + "' type='text' asp-for='matriz[i,j] class='form-control'></div><p> = </p>"
+    //            }
+    //            else if (j == total_var)
+    //            {
+    //            $form += "<div class='col-sm-2'><input id='var" + j + "_restricao" + i + "' type='text' asp-for='matriz[i,j] class='form-control'></div>"
+    //            }
+    //            else
+    //            {
+    //            $form += "<div class='col-sm-2'><input id='var" + j + "_restricao" + i + "' type='text' asp-for='matriz[i,j] class='form-control'></div><p> + </p>"
+    //            }
+    //        }
+    //        $form += "</div></fieldset>"
+    //    }
+    //    $form += "<a class='btn btn-sm btn-secondary' type='submit' >Executar</a>"
+    //    $form += "</form>"
+
+    //    $('#form').html($form);
+    //}
+</script>

@@ -1,0 +1,55 @@
+﻿@model List<SimplexSolver.Models.QuadroSimplex>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<br>
+<br>
+@{
+    foreach (QuadroSimplex obj in Model)
+    {
+    <table class="table table-striped table-bordered nowrap" style="width:100%">
+        @{ 
+            var interacao = Model.IndexOf(obj) + 1;
+        }
+        <p>Interação @interacao</p>
+        @for (int i = 0, k = 0; i < obj.Matriz.GetLength(0) + 1; i++)
+        {
+            if (k == 0)
+            {
+                <tr>
+                    <td style="text-align: center;">Base</td>
+                    @for (int j = obj.Matriz.GetLength(0); j < obj.Elementos.Count(); j++)
+                    {
+                        <td style="text-align: center;">@obj.Elementos[j]</td>
+                    }
+                </tr>
+                k++;
+            }
+            if (i == obj.Matriz.GetLength(0))
+            {
+                <tr>
+                    <td style="text-align: center;">Z</td>
+                    @for (int b = 0; b < obj.FuncaoObjetiva.Length; b++)
+                    {
+                        <td style="text-align: center;">@Math.Round(obj.FuncaoObjetiva[b], 2)</td>
+                    }
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <td style="text-align: center;">@obj.Elementos[i]</td>
+                    @for (int j = 0; j < obj.Matriz.GetLength(1); j++)
+                    {
+                        <td style="text-align: center;">@Math.Round(obj.Matriz[i, j], 2)</td>
+                    }
+                </tr>
+            }
+        }
+
+    </table>
+        <br>
+        <br>
+    }
+}
