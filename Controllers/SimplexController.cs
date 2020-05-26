@@ -18,6 +18,7 @@ namespace SimplexSolver.Controllers
         decimal[] funcaoObjetiva;
         decimal[,] matrizNumerica;
         string[] Var;
+        string[] ElementosOriginais;
         List<QuadroSimplex> Resultado;
         bool ExibirPassoAPasso;
         #endregion
@@ -35,13 +36,16 @@ namespace SimplexSolver.Controllers
 
         public void PrepareToExecute(Simplex simplex)
         {
+            #region Preechimento das variáveis necessárias
             numeroVariaveis = simplex.Variaveis.Value;
             numeroRestricoes = simplex.Restricoes.Value;
-            qtdColunas = (numeroVariaveis * 2) + 1;
+            qtdColunas = (numeroVariaveis + numeroRestricoes) + 1;
             funcaoObjetiva = new decimal[qtdColunas];
             matrizNumerica = new decimal[numeroRestricoes, qtdColunas];
             Var = new string[numeroRestricoes + qtdColunas];
+            #endregion
 
+            #region Montar vetor da função objetivo
             for (int i =0; i < qtdColunas; i++)
             {
                 if (i < numeroVariaveis)
@@ -49,52 +53,80 @@ namespace SimplexSolver.Controllers
                 else
                     funcaoObjetiva[i] = 0;
             }
+            #endregion
 
-            for(int i = 0, k = 0; i < numeroRestricoes; i++)
+            #region Montar matriz de acordo com valores preenchidos
+            for (int i = 0, k = 0; i < numeroRestricoes; i++)
             {
                 for (int j = 0; j < numeroVariaveis + 1; j++)
                 {
                     if (j == numeroVariaveis)
-                        j = (numeroVariaveis * 2);
+                        j = (numeroVariaveis + numeroRestricoes);
                     matrizNumerica[i, j] = simplex.Matriz[k];
                     k++;
                 }
             }
 
-            for (int i = 0, j = 1; i < (numeroRestricoes + qtdColunas); i++, j++)
+            for (int i = 0; i < numeroRestricoes; i++)
             {
-                if (j > numeroVariaveis)
+                matrizNumerica[i, numeroVariaveis + i] = 1;
+            }
+            #endregion
+
+            #region Montar vetor com Elementos da operação
+            for (int i = 0, j = 1, k = 1; i < (numeroRestricoes + qtdColunas); i++)
+            {
+                if (j > numeroRestricoes)
                 {
                     j = 1;
                 }
                 if (i < numeroRestricoes)
+                {
                     Var[i] = "F" + j;
+                    j++;
+                }
                 else if (i < qtdColunas - 1)
-                    Var[i] = "X" + j;
+                {
+                    Var[i] = "X" + k;
+                    k++;
+                }
                 else if (i < (numeroRestricoes + qtdColunas - 1))
+                {
                     Var[i] = "F" + j;
+                    j++;
+                }
                 else
                     Var[i] = "B";
             }
-            quadroSimplex = new QuadroSimplex(Var, matrizNumerica, funcaoObjetiva);
+            #endregion
 
+            ElementosOriginais = (string[])Var.Clone();
+
+            quadroSimplex = new QuadroSimplex(Var, matrizNumerica, funcaoObjetiva);
         }
 
         public void Run()
         {
+            //Inicialização da variável utilizada para exibição do resultado / passo a passo
             Resultado = new List<QuadroSimplex>();
+
+            //Caso de exibição do passo a passo, inserir resultado antes da primeira interação
             if(ExibirPassoAPasso)
             {
                 QuadroSimplex inicial = quadroSimplex.Clone(quadroSimplex);
                 Resultado.Add(inicial);
             }
+
             while (quadroSimplex.FuncaoObjetiva.Where(x => x < 0).Any() && qtdInterations < 100)
             {
+                #region Variaveis auxiliares
                 qtdInterations++;
                 decimal lowestValueToOut = 0;
                 int positionOutLine = 0;
-
                 int positionEnteringElement;
+                #endregion
+
+
                 //Buscando coluna do elemento que entrará na base
                 positionEnteringElement = FindPositionLowestValue(quadroSimplex.FuncaoObjetiva);
                 if (!(positionEnteringElement >= 0))
@@ -116,7 +148,7 @@ namespace SimplexSolver.Controllers
                         continue;
                 }
 
-
+                //Cálculos das novas linhas/colunas
                 if (!(quadroSimplex.Matriz[positionOutLine, positionEnteringElement] == 0))
                 {
                     decimal pivo = quadroSimplex.Matriz[positionOutLine, positionEnteringElement];
@@ -139,9 +171,11 @@ namespace SimplexSolver.Controllers
                         }
                 }
 
+                #region Alocação do elemento para a posição correta no vetor de acordo com a entrada/saída de elementos
                 var Element = quadroSimplex.Elementos[quadroSimplex.Matriz.GetLength(0) + positionEnteringElement];
                 quadroSimplex.Elementos[quadroSimplex.Matriz.GetLength(0) + positionEnteringElement] = quadroSimplex.Elementos[positionOutLine];
                 quadroSimplex.Elementos[positionOutLine] = Element;
+                #endregion
 
                 decimal valueLoadLine = -quadroSimplex.FuncaoObjetiva[positionEnteringElement];
 
@@ -151,12 +185,20 @@ namespace SimplexSolver.Controllers
                 if (ExibirPassoAPasso)
                 {
                     QuadroSimplex aux = quadroSimplex.Clone(quadroSimplex);
+                    for(int i = numeroRestricoes; i < (numeroRestricoes + qtdColunas); i++)
+                    {
+                        aux.Elementos[i] = ElementosOriginais[i];
+                    }
                     Resultado.Add(aux);
-                }  
+                }
             }
             if(!ExibirPassoAPasso)
             {
                 QuadroSimplex final = quadroSimplex.Clone(quadroSimplex);
+                for (int i = numeroRestricoes; i < (numeroRestricoes + qtdColunas); i++)
+                {
+                    final.Elementos[i] = ElementosOriginais[i];
+                }
                 Resultado.Add(final);
             }
         }
