@@ -21,6 +21,8 @@ namespace SimplexSolver.Controllers
         string[] ElementosOriginais;
         List<QuadroSimplex> Resultado;
         bool ExibirPassoAPasso;
+        bool Minimizar;
+        List<Result> Results;
         #endregion
 
         public IActionResult Index(Simplex simplex)
@@ -29,7 +31,11 @@ namespace SimplexSolver.Controllers
             simplex.Restricoes = Convert.ToInt32(TempData["Restricoes"]);
             simplex.Minimizar = Convert.ToBoolean(TempData["Minimizar"]);
             ExibirPassoAPasso = Convert.ToBoolean(TempData["ExibirPassoAPasso"]);
+            Minimizar = simplex.Minimizar;
             PrepareToExecute(simplex);
+            if(!simplex.Minimizar)
+                if (!PreValidateFields(matrizNumerica))
+                    RedirectToAction("Index", "Home");
             Run();
             return View(Resultado);
         }
@@ -109,9 +115,10 @@ namespace SimplexSolver.Controllers
         {
             //Inicialização da variável utilizada para exibição do resultado / passo a passo
             Resultado = new List<QuadroSimplex>();
+            Results = new List<Result>();
 
             //Caso de exibição do passo a passo, inserir resultado antes da primeira interação
-            if(ExibirPassoAPasso)
+            if (ExibirPassoAPasso)
             {
                 QuadroSimplex inicial = quadroSimplex.Clone(quadroSimplex);
                 Resultado.Add(inicial);
@@ -192,6 +199,7 @@ namespace SimplexSolver.Controllers
                     Resultado.Add(aux);
                 }
             }
+
             if(!ExibirPassoAPasso)
             {
                 QuadroSimplex final = quadroSimplex.Clone(quadroSimplex);
@@ -201,6 +209,18 @@ namespace SimplexSolver.Controllers
                 }
                 Resultado.Add(final);
             }
+
+            for (int i = 0; i < numeroRestricoes + qtdColunas; i++)
+            {
+                if (Results.Where(x => x.Elemento.Equals(quadroSimplex.Elementos[i])).Any())
+                    continue;
+                else
+                    Results.Add(new Result() { 
+                        Elemento = quadroSimplex.Elementos[i], 
+                        Valor = i < numeroRestricoes ? quadroSimplex.Matriz[i, qtdColunas - 1] : 
+                        (i == numeroRestricoes + qtdColunas - 1 ? quadroSimplex.FuncaoObjetiva[qtdColunas - 1] : 0) });
+            }
+            ViewData["Resultado"] = Results;
         }
 
         public int FindPositionLowestValue(decimal[] funcaoObjetiva)
@@ -216,6 +236,20 @@ namespace SimplexSolver.Controllers
                 }
             }
             return position;
+        }
+
+        public bool PreValidateFields(decimal[,] matriz)
+        {
+            for (int i = 0; i < matriz.GetLength(0); i++)
+            {
+                for (int j = 0; j < matriz.GetLength(1); j++)
+                {
+                    if (!(matriz[i, j] >= 0))
+                        throw new Exception("Valores devem ser maiores ou iguais a zero");
+                }
+            }
+
+            return true;
         }
 
     }

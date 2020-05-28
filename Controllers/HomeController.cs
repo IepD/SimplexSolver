@@ -10,7 +10,6 @@ using SimplexSolver.Models;
 
 namespace SimplexSolver.Controllers
 {
-    //https://www.youtube.com/watch?v=E7Voso411Vs
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
