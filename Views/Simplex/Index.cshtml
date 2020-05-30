@@ -54,13 +54,61 @@
     <br>
     <fieldset>
         <legend>Resultados</legend>
-        @foreach (var obj in ViewData["Resultado"] as IList<Result>)
-        {
-            <div class="row">
-                <p>@obj.Elemento = </p>
-                <p>@Math.Round(obj.Valor, 2)</p>
-            </div>
+        <table class="table table-striped table-bordered nowrap" style="width:100%">
+            <tr>
+                @foreach (var obj in ViewData["Resultado"] as IList<Result>)
+                {
+                    <td style="text-align: center;">@obj.Elemento</td>
+                }
+            </tr>
+            <tr>
+                @foreach (var obj in ViewData["Resultado"] as IList<Result>)
+                {
+                    <td style="text-align: center;">@Math.Round(obj.Valor, 2)</td>
+                }
+            </tr>
+        </table>
+    </fieldset>
 
-        }
-        </fieldset>
-        }
+    <br>
+    <fieldset>
+        <legend>Análise de Sensibilidade</legend>
+        <table class="table table-striped table-bordered nowrap" style="width:100%; align-content:center">
+            @{ 
+                string[] analise = (string[])ViewData["Analise"];
+            }
+            @for(int i = 0, k = 0; i < ((analise.Length + 14)/14); i++)
+            {
+                if (i == 0)
+                {
+                    <tr>
+                        <td style="text-align: center;">Variável</td>
+                        <td style="text-align: center;">Tipo de Variável</td>
+                        <td style="text-align: center;">Valor Inicial</td>
+                        <td style="text-align: center;">Valor Final</td>
+                        <td style="text-align: center;">Básica</td>
+                        <td style="text-align: center;">Recurso Escasso</td>
+                        <td style="text-align: center;">Sobra Recurso</td>
+                        <td style="text-align: center;">Uso Recurso</td>
+                        <td style="text-align: center;">Preço Sombra</td>
+                        <td style="text-align: center;">Custo Reduzido</td>
+                        <td style="text-align: center;">Aumentar Parâmetro</td>
+                        <td style="text-align: center;">Reduzir Parâmetro</td>
+                        <td style="text-align: center;">Máximo</td>
+                        <td style="text-align: center;">Mínimo</td>
+                    </tr>
+                }
+                else
+                {
+                    <tr>
+                        @for (int j = 0; j < 14; j++)
+                        {
+                            <td style="text-align: center;">@analise[k]</td>
+                            k++;
+                        }
+                    </tr>
+                }
+            }
+        </table>
+    </fieldset>
+}
