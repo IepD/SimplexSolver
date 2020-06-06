@@ -36,7 +36,7 @@ namespace SimplexSolver.Controllers
             Minimizar = simplex.Minimizar;
             PrepareToExecute(simplex);
             if (!PreValidateFields(matrizNumerica, simplex.Minimizar))
-                    RedirectToAction("Index", "Home");
+                RedirectToAction("Index", "Home");
             Run();
             AnaliseSensibilidade();
             ViewData["ExibirPassoAPasso"] = ExibirPassoAPasso;
@@ -55,7 +55,7 @@ namespace SimplexSolver.Controllers
             #endregion
 
             #region Montar vetor da função objetivo
-            for (int i =0; i < qtdColunas; i++)
+            for (int i = 0; i < qtdColunas; i++)
             {
                 if (i < numeroVariaveis)
                     funcaoObjetiva[i] = (simplex.Minimizar ? simplex.objectiveVector[i] : -simplex.objectiveVector[i]);
@@ -196,7 +196,7 @@ namespace SimplexSolver.Controllers
                 if (ExibirPassoAPasso)
                 {
                     QuadroSimplex aux = quadroSimplex.Clone(quadroSimplex);
-                    for(int i = numeroRestricoes; i < (numeroRestricoes + qtdColunas); i++)
+                    for (int i = numeroRestricoes; i < (numeroRestricoes + qtdColunas); i++)
                     {
                         aux.Elementos[i] = ElementosOriginais[i];
                     }
@@ -204,7 +204,7 @@ namespace SimplexSolver.Controllers
                 }
             }
 
-            if(!ExibirPassoAPasso)
+            if (!ExibirPassoAPasso)
             {
                 QuadroSimplex final = quadroSimplex.Clone(quadroSimplex);
                 for (int i = numeroRestricoes; i < (numeroRestricoes + qtdColunas); i++)
@@ -219,10 +219,12 @@ namespace SimplexSolver.Controllers
                 if (Results.Where(x => x.Elemento.Equals(quadroSimplex.Elementos[i])).Any())
                     continue;
                 else
-                    Results.Add(new Result() { 
-                        Elemento = quadroSimplex.Elementos[i], 
-                        Valor = i < numeroRestricoes ? quadroSimplex.Matriz[i, qtdColunas - 1] : 
-                        (i == numeroRestricoes + qtdColunas - 1 ? (Minimizar ? -quadroSimplex.FuncaoObjetiva[qtdColunas - 1] : quadroSimplex.FuncaoObjetiva[qtdColunas - 1]) : 0) });
+                    Results.Add(new Result()
+                    {
+                        Elemento = quadroSimplex.Elementos[i],
+                        Valor = i < numeroRestricoes ? quadroSimplex.Matriz[i, qtdColunas - 1] :
+                        (i == numeroRestricoes + qtdColunas - 1 ? (Minimizar ? -quadroSimplex.FuncaoObjetiva[qtdColunas - 1] : quadroSimplex.FuncaoObjetiva[qtdColunas - 1]) : 0)
+                    });
             }
 
             ViewData["Resultado"] = Results;
@@ -247,7 +249,7 @@ namespace SimplexSolver.Controllers
 
                         #region Segunda Coluna
                         case 1:
-                            if(i < numeroVariaveis)
+                            if (i < numeroVariaveis)
                                 ResultadoAnaliseSensibilidade[k] = "Decisão";
                             else if (i == (numeroRestricoes + numeroVariaveis))
                                 ResultadoAnaliseSensibilidade[k] = "Função Objetivo";
@@ -277,16 +279,16 @@ namespace SimplexSolver.Controllers
                         #region Quinta Coluna
                         case 4:
                             bool isBasic = false;
-                            for(int y = 0; y < numeroRestricoes; y++)
+                            for (int y = 0; y < numeroRestricoes; y++)
                             {
-                                if(ElementosOriginais[i + numeroRestricoes].Equals(quadroSimplex.Elementos[y]) || i == (numeroRestricoes + numeroVariaveis))
+                                if (ElementosOriginais[i + numeroRestricoes].Equals(quadroSimplex.Elementos[y]) || i == (numeroRestricoes + numeroVariaveis))
                                 {
                                     ResultadoAnaliseSensibilidade[k] = "Sim";
                                     isBasic = true;
                                     break;
                                 }
                             }
-                            if(!isBasic)
+                            if (!isBasic)
                                 ResultadoAnaliseSensibilidade[k] = "Não";
                             break;
                         #endregion
@@ -299,7 +301,7 @@ namespace SimplexSolver.Controllers
                                 ResultadoAnaliseSensibilidade[k] = "-";
                             else
                                 ResultadoAnaliseSensibilidade[k] = (Results.Where(x => x.Elemento.Equals(ElementosOriginais[i + numeroRestricoes])).FirstOrDefault().Valor == 0 ? "Sim" : "Não");
-                        break;
+                            break;
                         #endregion
 
                         #region Sétima Coluna
@@ -354,7 +356,7 @@ namespace SimplexSolver.Controllers
                                 ResultadoAnaliseSensibilidade[k] = "-";
                             else
                             {
-                                for(int y = 0; y < numeroRestricoes; y++)
+                                for (int y = 0; y < numeroRestricoes; y++)
                                 {
                                     if (quadroSimplex.Matriz[y, numeroVariaveis + aumentarParametro] == 0)
                                         continue;
@@ -404,9 +406,9 @@ namespace SimplexSolver.Controllers
                                 ResultadoAnaliseSensibilidade[k] = "-";
                             else
                                 if (ResultadoAnaliseSensibilidade[k - 10].Equals("INFINITO") || ResultadoAnaliseSensibilidade[k - 2].Equals("INFINITO"))
-                                    ResultadoAnaliseSensibilidade[k] = "INFINITO";
-                                else
-                                    ResultadoAnaliseSensibilidade[k] = (Convert.ToDecimal(ResultadoAnaliseSensibilidade[k - 10]) + Convert.ToDecimal(ResultadoAnaliseSensibilidade[k - 2])).ToString();
+                                ResultadoAnaliseSensibilidade[k] = "INFINITO";
+                            else
+                                ResultadoAnaliseSensibilidade[k] = (Convert.ToDecimal(ResultadoAnaliseSensibilidade[k - 10]) + Convert.ToDecimal(ResultadoAnaliseSensibilidade[k - 2])).ToString();
                             break;
                         #endregion
 
@@ -418,9 +420,9 @@ namespace SimplexSolver.Controllers
                                 ResultadoAnaliseSensibilidade[k] = "-";
                             else
                                 if (ResultadoAnaliseSensibilidade[k - 11].Equals("INFINITO") || ResultadoAnaliseSensibilidade[k - 2].Equals("INFINITO"))
-                                    ResultadoAnaliseSensibilidade[k] = "INFINITO";
-                                else
-                                    ResultadoAnaliseSensibilidade[k] = (Convert.ToDecimal(ResultadoAnaliseSensibilidade[k - 11]) - Convert.ToDecimal(ResultadoAnaliseSensibilidade[k - 2])).ToString();
+                                ResultadoAnaliseSensibilidade[k] = "INFINITO";
+                            else
+                                ResultadoAnaliseSensibilidade[k] = (Convert.ToDecimal(ResultadoAnaliseSensibilidade[k - 11]) - Convert.ToDecimal(ResultadoAnaliseSensibilidade[k - 2])).ToString();
                             break;
                             #endregion
                     }
@@ -446,15 +448,12 @@ namespace SimplexSolver.Controllers
 
         public bool PreValidateFields(decimal[,] matriz, bool minimizar)
         {
-            if(!minimizar)
+            for (int i = 0; i < matriz.GetLength(0); i++)
             {
-                for (int i = 0; i < matriz.GetLength(0); i++)
+                for (int j = 0; j < matriz.GetLength(1); j++)
                 {
-                    for (int j = 0; j < matriz.GetLength(1); j++)
-                    {
-                        if (!(matriz[i, j] >= 0))
-                            throw new Exception("Valores devem ser maiores ou iguais a zero");
-                    }
+                    if (!(matriz[i, j] >= 0))
+                        throw new Exception("Valores devem ser maiores ou iguais a zero");
                 }
             }
 
