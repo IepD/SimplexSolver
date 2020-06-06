@@ -35,11 +35,11 @@ namespace SimplexSolver.Controllers
             ExibirPassoAPasso = Convert.ToBoolean(TempData["ExibirPassoAPasso"]);
             Minimizar = simplex.Minimizar;
             PrepareToExecute(simplex);
-            if(!simplex.Minimizar)
-                if (!PreValidateFields(matrizNumerica))
+            if (!PreValidateFields(matrizNumerica, simplex.Minimizar))
                     RedirectToAction("Index", "Home");
             Run();
             AnaliseSensibilidade();
+            ViewData["ExibirPassoAPasso"] = ExibirPassoAPasso;
             return View(Resultado);
         }
 
@@ -249,7 +249,7 @@ namespace SimplexSolver.Controllers
                         case 1:
                             if(i < numeroVariaveis)
                                 ResultadoAnaliseSensibilidade[k] = "Decisão";
-                            else if (i == (numeroRestricoes + numeroVariaveis + 1))
+                            else if (i == (numeroRestricoes + numeroVariaveis))
                                 ResultadoAnaliseSensibilidade[k] = "Função Objetivo";
                             else
                                 ResultadoAnaliseSensibilidade[k] = "Folga";
@@ -444,16 +444,23 @@ namespace SimplexSolver.Controllers
             return position;
         }
 
-        public bool PreValidateFields(decimal[,] matriz)
+        public bool PreValidateFields(decimal[,] matriz, bool minimizar)
         {
-            for (int i = 0; i < matriz.GetLength(0); i++)
+            if(!minimizar)
             {
-                for (int j = 0; j < matriz.GetLength(1); j++)
+                for (int i = 0; i < matriz.GetLength(0); i++)
                 {
-                    if (!(matriz[i, j] >= 0))
-                        throw new Exception("Valores devem ser maiores ou iguais a zero");
+                    for (int j = 0; j < matriz.GetLength(1); j++)
+                    {
+                        if (!(matriz[i, j] >= 0))
+                            throw new Exception("Valores devem ser maiores ou iguais a zero");
+                    }
                 }
             }
+
+            for (int i = 0; i < matriz.GetLength(0); i++)
+                if (!(matriz[i, matriz.GetLength(1) - 1] >= 0))
+                    throw new Exception("Valores devem ser maiores ou iguais a zero");
 
             return true;
         }
