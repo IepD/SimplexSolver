@@ -149,7 +149,7 @@ namespace SimplexSolver.Controllers
                     if (quadroSimplex.Matriz[i, positionEnteringElement] != 0)
                     {
                         decimal resultAux = quadroSimplex.Matriz[i, quadroSimplex.Matriz.GetLength(1) - 1] / quadroSimplex.Matriz[i, positionEnteringElement];
-                        if ((resultAux < lowestValueToOut && resultAux >= 0) || lowestValueToOut == 0)
+                        if ((resultAux < lowestValueToOut && resultAux >= 0) || lowestValueToOut == 0 && resultAux >= 0)
                         {
                             lowestValueToOut = resultAux;
                             positionOutLine = i;
